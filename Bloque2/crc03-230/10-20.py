@@ -37,9 +37,9 @@ class App(ctk.CTk):
 
     def _crear_canvas_matplotlib(self, frame):
         figura = Figure(figsize=(7, 5), dpi=100)
-        figura.patch.set_facecolor("#1e1e2e")          
+        figura.patch.set_facecolor("#1e1e2e")
         eje = figura.add_subplot(111)
-        eje.set_facecolor("#12121f")                    
+        eje.set_facecolor("#12121f")
         canvas = FigureCanvasTkAgg(figura, master=frame)
         canvas.get_tk_widget().pack(fill="both", expand=True)
         return figura, eje, canvas
@@ -68,10 +68,10 @@ class App(ctk.CTk):
                     ys.append(resultado_f)
                 else:
                     xs.append(val)
-                    ys.append(None)   
+                    ys.append(None)
             except Exception:
                 xs.append(val)
-                ys.append(None)      
+                ys.append(None)
         return xs, ys
 
     def _aplicar_estilo_ejes(self, eje):
@@ -562,7 +562,7 @@ class App(ctk.CTk):
 
         try:
             h_val = sp.sympify(h_str)
-            _ = float(h_val)   
+            _ = float(h_val)
         except Exception:
             self._label_result_calc.configure(text="")
             self._mostrar_texto(self._txt_proc_calc,
@@ -809,7 +809,7 @@ class App(ctk.CTk):
             if res_neg is not None and res_neg not in (sp.oo, -sp.oo):
                 try:
                     yh = float(res_neg)
-                    # Solo dibujar si es diferente al de +∞
+
                     if res_pos is None or float(res_pos) != yh:
                         self._ax_inf.axhline(
                             y=yh, color="#ce93d8", linestyle="--",

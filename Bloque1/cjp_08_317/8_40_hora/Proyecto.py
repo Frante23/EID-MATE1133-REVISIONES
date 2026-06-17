@@ -7,69 +7,69 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import math
 
 def calcular_limite_numerico(funcion_str, c_str):
-    #Interpretar el valor de 'c' (por si el usuario escribe "pi" o "pi/2")
+
     try:
-        # Usamos sympify para que entienda "pi" y evalf para volverlo decimal
+
         c_val = float(sp.sympify(c_str).evalf())
     except Exception:
         return "Error: Verifica el valor de x."
 
-    # 2. Definir una distancia 'h' muy pequeña para acercarnos
+
     h = 0.00001 
     
-    #Evaluar por la izquierda (c - h) y por la derecha (c + h)
+
     lim_izq = evaluar_funcion(funcion_str, c_val - h)
     lim_der = evaluar_funcion(funcion_str, c_val + h)
     
-    # 4. Comprobar si hubo errores matemáticos (ej. asíntotas verticales)
+
     if lim_izq is None or lim_der is None:
         return "El límite diverge o es indefinido"
         
-    #Comparar ambos lados. Si la diferencia es muy chiquita, convergen al mismo punto.
+
     if abs(lim_izq - lim_der) < 0.01:
-        # Promediamos ambos lados para mayor precisión y redondeamos a 4 decimales
+
         limite_final = (lim_izq + lim_der) / 2
         return round(limite_final, 4)
     else:
-        # Si por la izquierda da un número y por la derecha otro muy distinto
+
         return "No existe (límites laterales distintos)"
 
-#Configuración de la ventana
+
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        # Título y tamaño de la ventana
+
         self.geometry("800x600")
         self.title("Analizador de limites")
         
-        # Colores de la aplicación
+
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
 
-        # Adaptación al tamaño de la ventana
+
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        # Para la creación de las pestañas
+
         self.tabs = ctk.CTkTabview(self)
         self.tabs.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
 
-        # Creación de las pestañas
+
         self.tab_inicio = self.tabs.add("Inicio")
         self.tab_limites_algebraicos = self.tabs.add("Límites algebraicos")
         self.tab_limites_trigonometricos = self.tabs.add("Límites trigonométricos")
         self.tab_limites_infinitos = self.tabs.add("Límites infinitos")
 
-        # Llamar a cada pestaña
+
         self.crear_inicio()
-        #self.crear_limites_algebraicos()
-        #self.crear_limites_trigonométricos()
-        #self.crear_limites_infinitos()
+
+
+
         
-        #-------------------
-        # Pestaña de inicio
-        #-------------------
+
+
+
 
     def crear_inicio(self):
         titulo = ctk.CTkLabel(
@@ -94,9 +94,9 @@ class App(ctk.CTk):
         canvas.get_tk_widget().pack(fill="both", expand=True)
         return figura, eje, canvas
         
-        #=====================
-        # Limites algebraicos
-        #=====================
+
+
+
 
     def L_algebraicos(self):
         contenedor = ctk.CTkFrame(self.L_algebraicos) 
@@ -127,12 +127,12 @@ class App(ctk.CTk):
         self.resulttado_limite = ctk.CTkTextbox(panel, width=310, height=350)
         self.resultado_limite.pack(pady=10)
 
-    #def graficar_limite(self):
+
 
 
 
     def calcular_limite_trig(self):
-        import math # Módulo estándar de Python, no requiere instalación
+        import math
         
         x = sp.Symbol('x')
         func_str = self.entry_trig_funcion.get()
@@ -142,9 +142,9 @@ class App(ctk.CTk):
             f = sp.sympify(func_str)
             c = sp.sympify(c_str)
 
-            # ==========================================
-            # 1. CÁLCULO NUMÉRICO DEL LÍMITE
-            # ==========================================
+
+
+
             limite_texto = ""
             
             if c == sp.oo:
@@ -167,12 +167,12 @@ class App(ctk.CTk):
             self.resultado_trig.delete("1.0", "end")
             self.resultado_trig.insert("1.0", f"Función: {f}\nLímite aproximado (x -> {c}):\nResultado = {limite_texto}")
 
-            # ==========================================
-            # 2. LÓGICA DE GRAFICACIÓN (PYTHON PURO)
-            # ==========================================
+
+
+
             self.ax_trig.clear()
             
-            # Definir el inicio y fin del gráfico
+
             if c == sp.oo: 
                 inicio, fin = 1, 50
             elif c == -sp.oo: 
@@ -181,30 +181,30 @@ class App(ctk.CTk):
                 c_val = float(c.evalf())
                 inicio, fin = c_val - 5, c_val + 5
 
-            # Reemplazo de np.linspace: Creamos 200 puntos equiespaciados manualmente
+
             num_puntos = 200
             paso = (fin - inicio) / (num_puntos - 1)
             x_vals = [inicio + i * paso for i in range(num_puntos)]
 
-            # Convertimos la función para que use el módulo 'math' de Python
+
             f_numerica = sp.lambdify(x, f, modules=['math'])
             y_vals = []
             
-            # Evaluamos la función punto por punto
+
             for val in x_vals:
                 try:
-                    # Intentamos calcular el valor de y
+
                     y = f_numerica(val)
                     y_vals.append(y)
                 except:
-                    # Si hay error (ej. división por cero en x=0 para sin(x)/x)
-                    # Agregamos 'nan' (Not a Number) para que matplotlib corte la línea ahí
+
+
                     y_vals.append(float('nan'))
 
-            # Matplotlib acepta listas normales de Python sin problemas
+
             self.ax_trig.plot(x_vals, y_vals, label="f(x)", color="cyan")
             
-            # Línea vertical en el punto a evaluar
+
             if c != sp.oo and c != -sp.oo:
                 self.ax_trig.axvline(x=c_val, color="red", linestyle="--", alpha=0.6, label=f"x = {c}")
 

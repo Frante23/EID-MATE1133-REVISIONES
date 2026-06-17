@@ -21,12 +21,12 @@ class MathLimites(ctk.CTk):
         self.configure(fg_color=NORD_DEEP)
         self.sidebar_expanded = False
 
-        # Sidebar colapsado
+
         self.sidebar = ctk.CTkFrame(self, fg_color=NORD_DARK, width=50)
         self.sidebar.pack(side="left", fill="y")
         self.sidebar.pack_propagate(False)
 
-        # Botón ☰
+
         self.btn_toggle = ctk.CTkButton(
             self.sidebar,
             text="☰",
@@ -40,7 +40,7 @@ class MathLimites(ctk.CTk):
         )
         self.btn_toggle.pack(pady=(15, 0), padx=5)
 
-        # Contenido expandido del sidebar
+
         self.sidebar_content = ctk.CTkFrame(self.sidebar, fg_color="transparent")
 
         ctk.CTkLabel(
@@ -65,12 +65,12 @@ class MathLimites(ctk.CTk):
                 anchor="w"
             ).pack(padx=10, pady=4)
 
-        # Contenedor principal
+
         self.container = ctk.CTkFrame(self, fg_color=NORD_DEEP)
         self.container.pack(side="right", expand=True, fill="both")
         self.container.bind("<Button-1>", self.cerrar_sidebar)
 
-        # Panel input
+
         self.panel_input = ctk.CTkFrame(self.container, fg_color=NORD_DARK)
         self.panel_input.place(relx=0.805, y=0, relwidth=0.195, relheight=1)
 
@@ -131,7 +131,7 @@ class MathLimites(ctk.CTk):
         )
         self.txt_resultado.pack(padx=20, pady=(0, 20))
 
-        # Frames por sección
+
         self.frames = {}
         for nombre in ["Limites"]:
             frame = ctk.CTkFrame(self.container, fg_color=NORD_DEEP)
@@ -190,12 +190,12 @@ class MathLimites(ctk.CTk):
         funcion_str = self.entry_funcion.get().strip()
         h_str = self.entry_h.get().strip()
 
-        # Error: campos vacíos
+
         if not funcion_str or not h_str:
             self.mostrar_resultado("⚠ Error: Complete ambos campos antes de calcular.")
             return
 
-        # Error: función inválida
+
         try:
             x = sp.Symbol('x')
             sp.sympify(funcion_str)
@@ -209,7 +209,7 @@ class MathLimites(ctk.CTk):
             )
             return
 
-        # Error: h inválido
+
         valores_infinito = ["oo", "inf", "∞", "-oo", "-inf", "-∞"]
         if h_str not in valores_infinito:
             try:
@@ -226,7 +226,7 @@ class MathLimites(ctk.CTk):
                 )
                 return
 
-        # Todo válido → calcular
+
         resultado = calcular_limite(funcion_str, h_str)
         pasos = resultado["pasos"]
         valor = resultado["resultado"]

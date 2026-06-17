@@ -3,9 +3,9 @@ from sympy import *
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
-# ==========================
-# CONFIGURACIÓN DE LA VENTANA
-# ==========================
+
+
+
 
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -14,9 +14,9 @@ ventana = ctk.CTk()
 ventana.title("Calculadora y Visualizador de Límites")
 ventana.geometry("600x600")
 
-# ==========================
-# TÍTULO
-# ==========================
+
+
+
 
 titulo = ctk.CTkLabel(
     ventana,
@@ -25,9 +25,9 @@ titulo = ctk.CTkLabel(
 )
 titulo.pack(pady=15)
 
-# ==========================
-# ENTRADA FUNCIÓN
-# ==========================
+
+
+
 
 label_funcion = ctk.CTkLabel(
     ventana,
@@ -41,9 +41,9 @@ entrada_funcion = ctk.CTkEntry(
 )
 entrada_funcion.pack(pady=10)
 
-# ==========================
-# ENTRADA h
-# ==========================
+
+
+
 
 label_h = ctk.CTkLabel(
     ventana,
@@ -57,9 +57,9 @@ entrada_h = ctk.CTkEntry(
 )
 entrada_h.pack(pady=10)
 
-# ==========================
-# RESULTADOS
-# ==========================
+
+
+
 
 resultado = ctk.CTkTextbox(
     ventana,
@@ -70,9 +70,9 @@ resultado.pack(pady=15)
 
 resultado.configure(state="disabled")
 
-# ==========================
-# FRAME GRÁFICA
-# ==========================
+
+
+
 
 frame_grafica = ctk.CTkFrame(
     ventana,
@@ -85,7 +85,7 @@ frame_grafica.pack(
     expand=True
 )
 
-# Mensaje inicial
+
 
 mensaje_grafica = ctk.CTkLabel(
     frame_grafica,
@@ -95,9 +95,9 @@ mensaje_grafica = ctk.CTkLabel(
 
 mensaje_grafica.pack(expand=True)
 
-# ==========================
-# FIGURA MATPLOTLIB
-# ==========================
+
+
+
 
 figura = plt.Figure(figsize=(6, 4))
 grafico = figura.add_subplot(111)
@@ -107,9 +107,9 @@ canvas = FigureCanvasTkAgg(
     master=frame_grafica
 )
 
-# ==========================
-# FUNCIÓN CALCULAR
-# ==========================
+
+
+
 
 def calcular():
 
@@ -131,7 +131,7 @@ def calcular():
 
         pasos += "=== DESARROLLO DEL ALGORITMO ===\n\n"
 
-        # PASO 1
+
 
         num, den = fraction(funcion)
 
@@ -139,7 +139,7 @@ def calcular():
         pasos += f"Numerador = {num}\n"
         pasos += f"Denominador = {den}\n\n"
 
-        # PASO 2
+
 
         num_eval = num.subs(x, h)
         den_eval = den.subs(x, h)
@@ -148,7 +148,7 @@ def calcular():
         pasos += f"Numerador evaluado = {num_eval}\n"
         pasos += f"Denominador evaluado = {den_eval}\n\n"
 
-        # CASO 1
+
 
         if den_eval != 0:
 
@@ -159,7 +159,7 @@ def calcular():
 
             pasos += f"LÍMITE = {resultado_final}"
 
-        # CASO 2
+
 
         elif num_eval == 0 and den_eval == 0:
 
@@ -180,7 +180,7 @@ def calcular():
 
             pasos += f"LÍMITE = {resultado_final}"
 
-        # CASO 3
+
 
         else:
 
@@ -194,9 +194,9 @@ def calcular():
         resultado.insert("1.0", pasos)
         resultado.configure(state="disabled")
 
-        # ==========================
-        # GRÁFICA
-        # ==========================
+
+
+
 
         try:
             mensaje_grafica.destroy()
@@ -241,7 +241,7 @@ def calcular():
 
         if not es_infinito:
             try:
-                
+
 
                 grafico.axvline(
                     float(h),
@@ -266,8 +266,8 @@ def calcular():
             except:
                 pass
 
-            
-                
+
+
 
         grafico.set_title("Gráfica de la función")
         grafico.set_xlabel("x")
@@ -293,9 +293,9 @@ def calcular():
         resultado.insert("1.0", f"Error: {error}")
         resultado.configure(state="disabled")
 
-# ==========================
-# BOTÓN
-# ==========================
+
+
+
 
 boton = ctk.CTkButton(
     ventana,
@@ -304,8 +304,8 @@ boton = ctk.CTkButton(
 )
 boton.pack(pady=15)
 
-# ==========================
-# EJECUTAR
-# ==========================
+
+
+
 
 ventana.mainloop()

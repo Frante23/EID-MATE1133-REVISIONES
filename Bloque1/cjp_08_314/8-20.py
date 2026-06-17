@@ -226,7 +226,7 @@ def calcular_limite(funcion_str, h_str):
     except Exception:
         pass
 
-    # Eliminado uso de series() para cumplir restricciones del proyecto.
+
 
     try:
         resultado_aprox = _limite_por_aproximacion(f_sym, x, h_val)
@@ -269,9 +269,9 @@ class LimiteApp(ctk.CTk):
         self._construir_layout()
 
     def _construir_layout(self):
-        self.columnconfigure(0, weight=0, minsize=310)   # inputs
-        self.columnconfigure(1, weight=1)                 # gráfico
-        self.columnconfigure(2, weight=0, minsize=390)   # sintaxis (más ancha)
+        self.columnconfigure(0, weight=0, minsize=310)
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=0, minsize=390)
         self.rowconfigure(0, weight=1)
         self._panel_izquierdo()
         self._panel_grafico()
@@ -293,7 +293,7 @@ class LimiteApp(ctk.CTk):
         scroll_panel.grid(row=0, column=0, sticky="nsew")
         scroll_panel.columnconfigure(0, weight=1)
 
-        # Guardar referencia para aislar eventos de scroll
+
         self._scroll_panel = scroll_panel
 
         panel = scroll_panel
@@ -306,7 +306,7 @@ class LimiteApp(ctk.CTk):
         ctk.CTkLabel(ft, text="CALCULO BASICO",
                      font=FONT_SM, text_color=C["txt2"]).pack(pady=(0, 12))
 
-        # f(x)
+
         ff = ctk.CTkFrame(panel, fg_color=C["card"], corner_radius=12)
         ff.grid(row=fila, column=0, padx=14, pady=5, sticky="ew"); fila += 1
         ff.columnconfigure(0, weight=1)
@@ -392,7 +392,7 @@ class LimiteApp(ctk.CTk):
         scroll_ej.grid(row=1, column=0, sticky="nsew", padx=4, pady=(0, 8))
         scroll_ej.columnconfigure(0, weight=1)
 
-        # ── Aislar rueda del ratón: cada scroll responde solo si el cursor está sobre él ──
+
         self._scroll_ej = scroll_ej
         self._aislar_scrolls(self._scroll_panel, self._scroll_ej)
 
@@ -436,7 +436,7 @@ class LimiteApp(ctk.CTk):
 
         fila_s = 0
         for cat_nombre, cat_color, items in CATEGORIAS_EJ:
-            # Cabecera de categoría
+
             cab = ctk.CTkFrame(scroll_ej, fg_color=cat_color, corner_radius=5, height=22)
             cab.grid(row=fila_s, column=0, sticky="ew", padx=2, pady=(8, 2), ipady=1)
             cab.columnconfigure(0, weight=1)
@@ -458,7 +458,7 @@ class LimiteApp(ctk.CTk):
                 ).grid(row=fila_s, column=0, sticky="ew", padx=2, pady=1)
                 fila_s += 1
 
-    # ── Aislamiento de scroll ─────────────────────────────────────────────────
+
     def _aislar_scrolls(self, scroll_externo, scroll_interno):
         """
         Evita que la rueda del ratón se propague entre los dos CTkScrollableFrame
@@ -481,8 +481,8 @@ class LimiteApp(ctk.CTk):
             if not _widget_bajo_cursor(target_scroll, event.x_root, event.y_root):
                 return "break"
             if hasattr(target_scroll, "_parent_canvas"):
-                # Windows: event.delta es múltiplo de 120 → normalizar a unidades
-                # Linux Button-4/5: event.delta == 0, usar num
+
+
                 if event.delta != 0:
                     units = -int(event.delta / 120) * 3
                 elif event.num == 4:
@@ -492,7 +492,7 @@ class LimiteApp(ctk.CTk):
                 target_scroll._parent_canvas.yview_scroll(units, "units")
             return "break"
 
-        # Redirigir eventos de rueda en todos los hijos de cada scroll
+
         def _bind_scroll(widget, scroll_target):
             widget.bind("<MouseWheel>",
                         lambda e, s=scroll_target: _scroll_exclusivo(s, e), add=True)
@@ -503,7 +503,7 @@ class LimiteApp(ctk.CTk):
             for child in widget.winfo_children():
                 _bind_scroll(child, scroll_target)
 
-        # Aplica bindings después de que la ventana haya terminado de construirse
+
         def _aplicar():
             _bind_scroll(scroll_externo, scroll_externo)
             _bind_scroll(scroll_interno, scroll_interno)
@@ -548,9 +548,9 @@ class LimiteApp(ctk.CTk):
             scrollbar_button_hover_color=C["acento_h"],
         )
         scroll.grid(row=1, column=0, sticky="nsew")
-        scroll.columnconfigure(0, weight=3)   # nombre
-        scroll.columnconfigure(1, weight=4)   # código
-        scroll.columnconfigure(2, weight=3)   # equivalente matemático
+        scroll.columnconfigure(0, weight=3)
+        scroll.columnconfigure(1, weight=4)
+        scroll.columnconfigure(2, weight=3)
 
         for col, titulo in enumerate(["Operación", "Escribir en f(x)", "Equivalente"]):
             ctk.CTkLabel(
@@ -566,7 +566,7 @@ class LimiteApp(ctk.CTk):
 
         for nombre, sintaxis, equivalente in TABLA_SINTAXIS:
             if sintaxis is None:
-                # Cabecera de sección — ocupa las 3 columnas
+
                 sec = ctk.CTkFrame(scroll, fg_color=C["sint_sec"], corner_radius=5, height=26)
                 sec.grid(row=fila, column=0, columnspan=3,
                          sticky="ew", padx=4, pady=(10, 2), ipady=2)
@@ -689,11 +689,11 @@ class LimiteApp(ctk.CTk):
         fig, ax = plt.subplots(figsize=(6.5, 4.8), facecolor=C["graf_bg"])
         ax.set_facecolor(C["graf_bg"])
 
-        # Curva principal
+
         ax.plot(xs, ys, color=C["acento"], linewidth=2.3,
                 label=f"f(x) = {funcion_str}", zorder=3)
 
-        # Anotaciones del límite
+
         if not es_infinito and h_float is not None:
             ax.axvline(x=h_float, color=C["acento"], linewidth=1.4,
                        linestyle="--", alpha=0.85, label=f"x → {h_str}", zorder=2)

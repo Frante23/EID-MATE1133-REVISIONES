@@ -24,7 +24,7 @@ MATH_ENV = {"__builtins__": {}, "pi": math.pi, "e": math.e,
             "sin": math.sin, "cos": math.cos, "tan": math.tan,
             "sqrt": math.sqrt, "log": math.log, "exp": math.exp}
 
-# ── Utilidades numéricas / simbólicas ──────────────────────────────────────────
+
 
 def _es_valido(v):
     if v is None or v is sp.nan or isinstance(v, AccumulationBounds): return False
@@ -98,12 +98,12 @@ def _safe_float(fn, val):
     except: return False
 
 def _lateral(expr, p, dir):
-    # Aproxima el límite lateral evaluando la función en tres puntos
-    # cada vez más cercanos a h (pasos: 1e-7, 2e-7, 3e-7) desde el lado
-    # indicado ('+' = derecha, '-' = izquierda).
-    # Se toma el valor más próximo a h (k=3) como mejor aproximación.
-    # Luego se intenta expresar el resultado como entero, fracción exacta
-    # o decimal de 6 cifras, en ese orden de precisión.
+
+
+
+
+
+
     try:
         hf = float(p)
     except:
@@ -111,7 +111,7 @@ def _lateral(expr, p, dir):
     sign = 1 if dir == '+' else -1
     fn = sp.lambdify(x, expr, modules=['math'])
     vals = []
-    for k in [1, 2, 3]:   # tres puntos: cada uno más cerca de h que el anterior
+    for k in [1, 2, 3]:
         try:
             v = fn(hf + sign * 1e-7 * k)
             if not (math.isnan(v) or math.isinf(v)):
@@ -120,21 +120,21 @@ def _lateral(expr, p, dir):
             pass
     if not vals:
         return sp.nan
-    prom = vals[-1]   # usar el punto más cercano a h
+    prom = vals[-1]
     r = round(prom)
-    if abs(prom - r) < 1e-5:          # ¿es un entero?
+    if abs(prom - r) < 1e-5:
         return sp.Integer(r)
     frac = Fraction(prom).limit_denominator(100)
-    if abs(float(frac) - prom) < 1e-5:  # ¿es una fracción simple?
+    if abs(float(frac) - prom) < 1e-5:
         return sp.Rational(frac.numerator, frac.denominator)
-    return sp.Float(round(prom, 6))     # decimal de 6 cifras
+    return sp.Float(round(prom, 6))
 
 
-# ── Motor de cálculo principal ─────────────────────────────────────────────────
+
 
 def calcular_limite(f_expr, h_val):
     """Devuelve el límite analítico. sp.nan → no existe."""
-    # ±∞
+
     if h_val in (sp.oo, -sp.oo):
         s = 1 if h_val == sp.oo else -1
         if f_expr.is_rational_function(x):
@@ -149,7 +149,7 @@ def calcular_limite(f_expr, h_val):
             return (sp.oo if val > 0 else -sp.oo) if math.isinf(val) else sp.Float(round(val,6))
         except: return sp.nan
 
-    # [1] Analítico primario: límites laterales bilaterales
+
     ld, li = _lateral(f_expr, h_val, '+'), _lateral(f_expr, h_val, '-')
     ok_d, ok_i = _es_valido(ld) or _es_inf(ld), _es_valido(li) or _es_inf(li)
     if ok_d and ok_i:
@@ -162,7 +162,7 @@ def calcular_limite(f_expr, h_val):
     if ok_d: return ld
     if ok_i: return li
 
-    # [2] Analítico secundario: sustitución / límites notables / factorización
+
     r = _sust(f_expr, h_val)
     if r is not None: return r
     if f_expr.has(*TRIG):
@@ -174,7 +174,7 @@ def calcular_limite(f_expr, h_val):
             if r is not None: return r
         except: pass
 
-    # [3] Respaldo numérico bilateral
+
     return _aprox_num(f_expr, h_val)
 
 
@@ -182,7 +182,7 @@ def _es_nan(v):
     return v is sp.nan or v == sp.nan
 
 
-# ── Generador de pasos ─────────────────────────────────────────────────────────
+
 
 def generar_pasos(f_expr, h_val, h_str, res):
     no_existe = _es_nan(res)
@@ -207,7 +207,7 @@ def generar_pasos(f_expr, h_val, h_str, res):
     else:
         P.append("Tipo: Límite " + ("trigonométrico" if f_expr.has(*TRIG) else "algebraico"))
 
-        # ── Estrategia 1: Límites laterales ───────────────────────────────────
+
         P.append("")
         P.append("Estrategia 1 — Límites laterales (condición de existencia)")
         P.append("  Propiedad: lím f(x) existe  ⟺  lím⁺ f(x) = lím⁻ f(x)")
@@ -229,7 +229,7 @@ def generar_pasos(f_expr, h_val, h_str, res):
         except Exception as e:
             P.append(f"  Cálculo lateral no resolvió: {e}")
 
-        # ── Estrategia 2: Sustitución directa ─────────────────────────────────
+
         P.append("")
         P.append("Estrategia 2 — Sustitución directa")
         P.append("  Propiedad: si f es continua en h → lím f(x) = f(h)")
@@ -240,7 +240,7 @@ def generar_pasos(f_expr, h_val, h_str, res):
             P.append(f"  f({h_str}) → indeterminación → se requiere simplificación")
 
             if f_expr.has(*TRIG):
-                # ── Estrategia 3a: Límites notables trigonométricos ────────────
+
                 P.append("")
                 P.append("Estrategia 3 — Límites notables trigonométricos")
                 P.append("  Propiedad fundamental: lím[u→0] sin(u)/u = 1")
@@ -264,7 +264,7 @@ def generar_pasos(f_expr, h_val, h_str, res):
                     else:
                         P.append("  No se identificó notable directo → ver resolución trig extendida")
             else:
-                # ── Estrategia 3b: Factorización / simplificación algebraica ──
+
                 P.append("")
                 P.append("Estrategia 3 — Factorización / simplificación algebraica")
                 P.append("  Propiedad: si (x−h) es factor común → se cancela (discontinuidad removible)")
@@ -284,7 +284,7 @@ def generar_pasos(f_expr, h_val, h_str, res):
                     else:
                         P.append("  No hay factor cancelable → respaldo numérico bilateral aplicado")
 
-        # ── Diagnóstico cuando el límite no existe ─────────────────────────────
+
         if no_existe:
             P.append("")
             P.append("⚠ El límite NO existe. Causa probable:")
@@ -307,7 +307,7 @@ def generar_pasos(f_expr, h_val, h_str, res):
     return P
 
 
-# ── Resolución trigonométrica extendida (subclase) ────────────────────────────
+
 
 def _resolver_trig(expr, p):
     """Intenta resolver límites trig notables más complejos. Devuelve (val, desc) o (None, None)."""
@@ -369,7 +369,7 @@ def _resolver_trig(expr, p):
     return None, None
 
 
-# ── Preprocesador de expresiones ───────────────────────────────────────────────
+
 
 def preprocesar(texto):
     FNS = {'sin','cos','tan','cot','sec','csc','asin','acos','atan','acot',
@@ -386,7 +386,7 @@ def preprocesar(texto):
     return s
 
 
-# ── GUI ────────────────────────────────────────────────────────────────────────
+
 
 class App(ctk.CTk):
     EJEMPLOS = [
@@ -414,7 +414,7 @@ class App(ctk.CTk):
         self._punto_limite_x = self._punto_limite_y = self._limite_correcto = None
         self._build_ui()
 
-    # ── Construcción de la UI ──────────────────────────────────────────────────
+
 
     def _lbl(self, parent, text, size=12, bold=False, color=None, **kw):
         font = ctk.CTkFont(size=size, weight="bold" if bold else "normal")
@@ -485,7 +485,7 @@ class App(ctk.CTk):
                       font=ctk.CTkFont(size=11), fg_color="#2b2b2b", hover_color="#3d3d3d",
                       command=self._limpiar_hist).pack(padx=22, anchor="w")
 
-        # Panel derecho
+
         fd = ctk.CTkFrame(self, corner_radius=12, fg_color="transparent")
         fd.grid(row=0, column=1, sticky="nsew", padx=(0,12), pady=12)
         fd.grid_rowconfigure(0, weight=3); fd.grid_rowconfigure(1, weight=2)
@@ -509,7 +509,7 @@ class App(ctk.CTk):
                                             state="disabled", fg_color="#1e1e1e", text_color="white")
         self.textbox_pasos.pack(fill="both", expand=True, padx=14, pady=(0,10))
 
-    # ── Acciones ───────────────────────────────────────────────────────────────
+
 
     def _cargar(self, func, h):
         for e, v in [(self.entry_func, func), (self.entry_h, h)]:
@@ -567,7 +567,7 @@ class App(ctk.CTk):
             else:                                                     h_val = sp.sympify(hs, locals=TRIG_MAP)
 
             res = calcular_limite(f_expr, h_val)
-            # Asegurar que AccumBounds se trate como "no existe"
+
             if isinstance(res, AccumulationBounds): res = sp.nan
             no_existe = _es_nan(res)
 
@@ -602,9 +602,9 @@ class App(ctk.CTk):
 
         y_ok = [v for v in ys if v is not None]
         if y_ok:
-            # Si la función tiene saltos o crece demasiado, la escala calculada con
-            # todos los puntos distorsiona la vista cerca de h. En ese caso se usa
-            # solo los valores dentro de un radio ±2 alrededor del punto evaluado.
+
+
+
             if not h_val.is_infinite:
                 hf_centro = float(h_val)
                 y_cerca = [v for xi, v in zip(xs, ys)
@@ -709,7 +709,7 @@ class AppTrig(App):
         return res
 
     def calcular(self):
-        # Parche temporal: usar la versión trig-extendida para el cálculo
+
         fs = self.entry_func.get().strip()
         hs = self.entry_h.get().strip()
         if not fs or not hs:
@@ -725,7 +725,7 @@ class AppTrig(App):
             if isinstance(res, AccumulationBounds): res = sp.nan
             no_existe = _es_nan(res)
 
-            # Info trig extra en los pasos
+
             pasos = generar_pasos(f_expr, h_val, hs, res)
             if f_expr.has(*TRIG) and h_val not in (sp.oo, -sp.oo):
                 try:

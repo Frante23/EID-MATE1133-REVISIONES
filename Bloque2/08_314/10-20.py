@@ -1,4 +1,4 @@
-import customtkinter as ctk #Libreria que usaremos
+import customtkinter as ctk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import sympy as sp
@@ -9,33 +9,33 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        # Configuración básica de la ventana.
+
         self.title("Calculo de Limites")
         self.geometry("1200x720")
 
-        # Apariencia visual de la aplicación.
+
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
 
-        # Permite que la ventana se adapte al tamaño disponible.
+
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
-        # CTkTabview permite crear pestañas.
+
         self.tabs = ctk.CTkTabview(self)
         self.tabs.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
 
-        # Creación de pestañas.
+
         self.tab_inicio = self.tabs.add("Inicio")
         self.tab_limite = self.tabs.add("Limite")
 
-        # Llamamos a los métodos que construyen cada pestaña.
+
         self.crear_inicio()
         self.crear_limite()
 
-    # ========================================================
-    # PESTAÑA DE INICIO
-    # ========================================================
+
+
+
 
     def crear_inicio(self):
         titulo = ctk.CTkLabel(
@@ -62,13 +62,13 @@ class App(ctk.CTk):
         caja.configure(state="disabled")
 
 
-    # ========================================================
-    # FUNCIÓN AUXILIAR PARA CREAR FIGURAS DE MATPLOTLIB
-    # ========================================================
-    # Esta función evita repetir código.
-    # Crea una figura, un eje y un canvas para incrustar
-    # el gráfico dentro de un frame de CustomTkinter.
-    # ========================================================
+
+
+
+
+
+
+
 
     def crea_grafico(self, frame):
         figura = Figure(figsize=(6, 5), dpi=100)
@@ -81,24 +81,24 @@ class App(ctk.CTk):
         canvas.get_tk_widget().pack(fill="both", expand=True)
         return figura, eje, canvas
 
-#======================================
-#LIMITE ESTANDAR
-#======================================
+
+
+
 
     def crear_limite(self):
-        # Configuramos una cuadrícula en la pestaña para dividir controles y gráfico
-        self.tab_limite.grid_columnconfigure(0, weight=4) #izquierda
-        self.tab_limite.grid_columnconfigure(1, weight=1) #derecha
+
+        self.tab_limite.grid_columnconfigure(0, weight=4)
+        self.tab_limite.grid_columnconfigure(1, weight=1)
         self.tab_limite.grid_rowconfigure(0, weight=1)
 
-        # ---- COLUMNA DERECHA ----
+
         contenedor_datos = ctk.CTkFrame(self.tab_limite)
         contenedor_datos.grid(row=0, column=1, padx=0, pady=15, sticky="nsew")
 
         titulo = ctk.CTkLabel(contenedor_datos, text="Menu de Datos", font=("Arial", 22, "bold"))
         titulo.pack(pady=15)
 
-        # Menu de datos
+
         titulo_fx = ctk.CTkLabel(contenedor_datos, text="Ingrese la función:  Ej: (x**2 - 4)/(x - 2) o sin(x)/x)", font=("Arial", 14))
         titulo_fx.pack(pady=(10, 2))
         self.entrada_fx = ctk.CTkEntry(contenedor_datos, width=250, placeholder_text="f(x)")
@@ -109,39 +109,39 @@ class App(ctk.CTk):
         self.entrada_h = ctk.CTkEntry(contenedor_datos, width=250, placeholder_text="h")
         self.entrada_h.pack(pady=5)
 
-        # Botón de Acción
+
         self.btn_calcular = ctk.CTkButton(contenedor_datos, text="Calcular y Graficar", command=self.procesar_limite, font=("Arial", 14, "bold"))
         self.btn_calcular.pack(pady=25)
 
-        # Área para mostrar los resultados
+
         titulo_resultado = ctk.CTkLabel(contenedor_datos, text="Desarrollo:", font=("Arial", 15, "bold"))
         titulo_resultado.pack(pady=(10, 2))
 
         self.txt_resultado = ctk.CTkTextbox(contenedor_datos, width=350, height=220, font=("Consolas", 12))
         self.txt_resultado.pack(padx=0, pady=5)
         
-        # Etiqueta destacada para el resultado final
+
         self.resultado_final = ctk.CTkLabel(contenedor_datos, text="Límite L = ", font=("Arial", 18, "bold"), text_color="#1f538d")
         self.resultado_final.pack(pady=15)
 
-        # ---- COLUMNA IZQUIERDA ----
+
         self.grafico = ctk.CTkFrame(self.tab_limite)
         self.grafico.grid(row=0, column=0, padx=15, pady=15, sticky="nsew")
         
-        # se inicia el espacio del gráfico usando la función auxiliar
+
         self.figura, self.eje, self.canvas = self.crea_grafico(self.grafico)
 
-    # ========================================================
-    # evaluacion del limite
-    # ========================================================
+
+
+
 
     def procesar_limite(self):
-        # Habilitar caja de texto para escribir
+
         self.txt_resultado.configure(state="normal")
         self.txt_resultado.delete("1.0", "end")
 
         try:
-            # Obtiene los datos
+
             str_fx = self.entrada_fx.get()
             str_h = self.entrada_h.get()
 
@@ -149,19 +149,19 @@ class App(ctk.CTk):
                 self.resultado_final.configure(text="Error: Rellene todos los campos", text_color="red")
                 return
 
-            # Variable simbolica definida
+
             x = sp.symbols('x')
             
-            # Convertir el string en una expresión matemática que pueda leer sympy
+
             expresion = sp.sympify(str_fx)
             
-            # Convertir el valor h a flotante
+
             es_infinito_pos = (str_h.strip() == "oo")
             es_infinito_neg = (str_h.strip() == "-oo")
             es_infinito = es_infinito_pos or es_infinito_neg
 
             if es_infinito:
-                # Si tiende al infinito, x toma valores cada vez más grandes
+
                 pasos_infinitos = [10, 100, 1000, 10000, 100000]
                 h_imprimible = "+oo" if es_infinito_pos else "-oo"
                 self.txt_resultado.insert("end", f"Evaluando tendencia hacia h = {h_imprimible}\n")
@@ -170,7 +170,7 @@ class App(ctk.CTk):
                 
                 limite_final = None
                 for paso in pasos_infinitos:
-                    # Si es -oo, multiplicamos por -1 para ir hacia la izquierda en el eje X
+
                     x_eval = paso if es_infinito_pos else -paso
                     y_eval = expresion.subs(x, x_eval).evalf()
                     limite_final = float(y_eval)
@@ -178,64 +178,64 @@ class App(ctk.CTk):
                     dir_texto = "Tendencia (+)" if es_infinito_pos else "Tendencia (-)"
                     self.txt_resultado.insert("end", f"{dir_texto:<12} | {x_eval:<12} | {limite_final:<15.6f}\n")
                 
-                # Asumimos que el último valor de la secuencia es el límite L
+
                 L = round(limite_final, 4)
                 self.resultado_final.configure(text=f"Límite L = {L}", text_color="#22c55e")
             else:
                 h = float(sp.sympify(str_h).evalf())
 
-                # DESARROLLO ALGORÍTMICO
+
                 self.txt_resultado.insert("end", f"Evaluando entorno alrededor de h = {h}\n")
                 self.txt_resultado.insert("end", f"{'Dirección':<12} | {'x':<12} | {'f(x)':<15}\n")
                 self.txt_resultado.insert("end", "-" * 48 + "\n")
 
-                # Definimos distancias cercanas h (10^-1, 10^-2, 10^-3, ...) 
+
                 distancias = [0.1, 0.01, 0.001, 0.0001, 0.00001]
                 
                 limite_izq = None
                 limite_der = None
 
-                # Evaluacion por la izquierda (x -> h-)
+
                 for d in distancias:
                     x_eval = h - d
-                    # Se usa subs solo para sustituir :V y evalf para aproximar
+
                     y_eval = expresion.subs(x, x_eval).evalf()
                     limite_izq = float(y_eval)
                     self.txt_resultado.insert("end", f"Izquierda (-) | {x_eval:<12.5f} | {limite_izq:<15.6f}\n")
 
                 self.txt_resultado.insert("end", "-" * 48 + "\n")
 
-                # Evaluacion por la derecha (x -> h+)
+
                 for d in distancias:
                     x_eval = h + d
                     y_eval = expresion.subs(x, x_eval).evalf()
                     limite_der = float(y_eval)
                     self.txt_resultado.insert("end", f"Derecha   (+) | {x_eval:<12.5f} | {limite_der:<15.6f}\n")
 
-                # 3. Validación lógica del Límite 
-                # Si la diferencia entre aproximarse por izquierda y derecha es minúscula, el límite existe 
+
+
                 if abs(limite_izq - limite_der) < 1e-4:
-                    # Redondeamos el resultado para mostrar el entero o valor representativo
+
                     L = round(limite_izq, 4)
-                    self.resultado_final.configure(text=f"Límite L = {L}", text_color="#22c55e") # Verde éxito
+                    self.resultado_final.configure(text=f"Límite L = {L}", text_color="#22c55e")
                 else:
                     self.resultado_final.configure(text="El límite No Existe (L. Laterales distintos)", text_color="orange")
 
-            # carga la grafica
-            self.eje.clear() # Limpia el gráfico anterior
-            self.eje.set_facecolor('#1a1a1a') # Mantiene el tema oscuro
 
-            # Genera un rango de x con listas nativas en un entorno a [h - 4, h + 4]
+            self.eje.clear()
+            self.eje.set_facecolor('#1a1a1a')
+
+
             puntos_x = []
             puntos_y = []
             pasos = 200
-            # Cambia el rango de X
+
             if es_infinito:
                 if es_infinito_pos:
                     inicio_rango = 0
-                    fin_rango = 100  # Muestra el comportamiento hacia la derecha de la gráfica
+                    fin_rango = 100
                 else:
-                    inicio_rango = -100 # Muestra el comportamiento hacia la izquierda de la gráfica
+                    inicio_rango = -100
                     fin_rango = 0
             else:
                 inicio_rango = h - 10
@@ -243,51 +243,51 @@ class App(ctk.CTk):
 
             ancho_paso = (fin_rango - inicio_rango) / pasos
 
-            # ciclo para calcular las cordenadas
+
             for i in range(pasos + 1):
                 cur_x = inicio_rango + (i * ancho_paso)
-                # se evita evaluar directameente
+
                 if not es_infinito and abs(cur_x - h) < 1e-6:
                     continue
                 try:
                     cur_y = float(expresion.subs(x, cur_x).evalf())
-                    # Controlamos que no se grafiquen valores infinitos que rompan el tamaño
+
                     if abs(cur_y) < 1000:
                         puntos_x.append(cur_x)
                         puntos_y.append(cur_y)
                 except Exception:
-                    pass # Si hay algún error de dominio matemático, salta el punto
+                    pass
 
-            # Grafica
+
             self.eje.plot(puntos_x, puntos_y, color='#1f77b4', linewidth=2.5, label=f"f(x) = {str_fx}")
 
             if es_infinito:
-                # Si el límite al infinito existe, dibuja una asíntota horizontal en Y = L
+
                 self.eje.axhline(y=0, color='red', linestyle='--', alpha=0.6, label=f"Asín. Horiz. y = {L}")
             else:
-                # Remarca el punto h en el eje X
+
                 self.eje.axvline(x=h, color='red', linestyle='--', alpha=0.6, label=f"x = {h}")
             
-            # Configuraciones de estilo para el gráfico
+
             self.eje.grid(True, color='#444444', linestyle=':')
             self.eje.tick_params(colors='white')
             self.eje.legend(loc="upper right")
             
-            # Forza la actualización del grafico
+
             self.canvas.draw()
 
         except Exception as err:
-            # en caso de error
+
             self.resultado_final.configure(text="error de cálculo", text_color="red")
             self.txt_resultado.insert("end", f"\n[ERROR]: {str(err)}\nRevise que ingreso datos correctos (ej: 2*x en vez de 2x).")
         
-        # Deshabilita la caja para que el usuario no edite los números generados
+
         self.txt_resultado.configure(state="disabled")
 
-#======================================
-# FUNCION AUXILIAR
-# para mostrar Texto personalizado para los limites
-#======================================
+
+
+
+
     def mostrar_texto(self, caja, texto):
         caja.configure(state="normal")
         caja.delete("1.0", "end")

@@ -14,7 +14,7 @@ app.geometry("1000x600")
 
 
 def calcular_limite(f, h):
-    
+
     pasos = [1, 0.5, 0.1, 0.05, 0.01, 0.005, 0.001, 0.0001, 0.00001]
 
     izquierda = []
@@ -33,7 +33,7 @@ def calcular_limite(f, h):
         except:
             derecha.append(None)
 
-    
+
     izq = next((v for v in reversed(izquierda) if v is not None), None)
     der = next((v for v in reversed(derecha) if v is not None), None)
 
@@ -47,12 +47,12 @@ def calcular_limite(f, h):
         valor = round((izq + der) / 2, 6)
         return valor, True, izquierda, derecha
 
-   
+
     return None, False, izquierda, derecha
 
 
 def formato_resultado(lim_sp):
-    
+
     if lim_sp == sp.oo:
         return "+∞"
     if lim_sp == -sp.oo:
@@ -73,7 +73,7 @@ def boton_calcular():
             label_resultado.configure(text="Error: ingresa una función y un valor h")
             return
 
-       
+
         permitidos = {
             "x": x,
             "sin": sp.sin, "cos": sp.cos, "tan": sp.tan,
@@ -84,22 +84,22 @@ def boton_calcular():
         f = sp.sympify(texto_f, locals=permitidos)
         h = sp.sympify(texto_h, locals=permitidos)
 
-        
+
         if f.free_symbols and x not in f.free_symbols:
             label_resultado.configure(text="Error: la función debe contener la variable x")
             return
 
-        resultado_limite_sympy = None  
+        resultado_limite_sympy = None
 
         try:
             h_num = float(h)
         except (TypeError, ValueError):
             h_num = None
 
-       
+
         if h_num is not None and abs(h_num) != float('inf'):
 
-          
+
             if not f.free_symbols:
                 valor_cte = float(f)
                 label_resultado.configure(
@@ -108,13 +108,13 @@ def boton_calcular():
                 resultado_limite_sympy = f
 
             else:
-                
+
                 valor, existe, aprox_izq, aprox_der = calcular_limite(f, h_num)
 
                 izq_mostrar = next((v for v in reversed(aprox_izq) if v is not None), None)
                 der_mostrar = next((v for v in reversed(aprox_der) if v is not None), None)
 
-               
+
                 try:
                     resultado_limite_sympy = sp.limit(f, x, h)
                     validacion = f"\nValidación SymPy: {formato_resultado(resultado_limite_sympy)}"
@@ -139,7 +139,7 @@ def boton_calcular():
                 label_resultado.configure(text=texto)
 
         else:
-            
+
             try:
                 resultado_limite_sympy = sp.limit(f, x, h)
                 label_resultado.configure(
@@ -148,7 +148,7 @@ def boton_calcular():
             except Exception as e:
                 label_resultado.configure(text=f"No se pudo calcular: {e}")
 
-        
+
         ax.clear()
 
         if h_num is not None and abs(h_num) != float('inf'):
@@ -157,7 +157,7 @@ def boton_calcular():
         else:
             xs = [i * 0.05 for i in range(-200, 201)]
 
-       
+
         ys_raw = []
         for point in xs:
             try:
@@ -169,8 +169,8 @@ def boton_calcular():
             except:
                 ys_raw.append(float('nan'))
 
-       
-        validos = [v for v in ys_raw if v == v]  
+
+        validos = [v for v in ys_raw if v == v]
         if validos:
             vs = sorted(validos)
             n = len(vs)
@@ -196,10 +196,10 @@ def boton_calcular():
             ax.axvline(x=h_num, color="#e74c3c", linestyle="--",
                        linewidth=1.5, label=f"x → {h}")
 
-           
+
             ax.set_xlim(h_num - 2, h_num + 2)
 
-           
+
             try:
                 if resultado_limite_sympy is not None:
                     lim_float = float(resultado_limite_sympy)
@@ -224,7 +224,7 @@ def boton_calcular():
         label_resultado.configure(text=f"Error: {str(error)}")
 
 
-# --- Layout ---
+
 app.grid_columnconfigure(0, weight=0)
 app.grid_columnconfigure(1, weight=1)
 app.grid_rowconfigure(0, weight=1)

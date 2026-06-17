@@ -1,0 +1,477 @@
+try :
+    import customtkinter as ctk 
+    from sympy import lambdify ,oo ,sympify 
+    from matplotlib .figure import Figure 
+    from matplotlib .backends .backend_tkagg import FigureCanvasTkAgg 
+except ImportError as error :
+    print ("No se pudo iniciar la aplicacion porque falta una libreria.")
+    print ("Ejecuta: pip install sympy customtkinter matplotlib")
+    print (f"Detalle: {error }")
+    raise SystemExit 
+
+
+
+from limites import calcular_limite_propio ,limite_lateral ,x 
+
+
+
+
+
+ctk .set_appearance_mode ("dark")
+ctk .set_default_color_theme ("blue")
+
+
+ventana =ctk .CTk ()
+ventana .geometry ("1120x760")
+ventana .minsize (1050 ,700 )
+ventana .title ("Analizador y Visualizador de Límites — MATE1133")
+ventana .resizable (True ,True )
+
+
+
+
+
+frame_izq =ctk .CTkFrame (ventana ,width =390 ,corner_radius =12 )
+frame_izq .pack (side ="left",fill ="y",padx =14 ,pady =14 )
+frame_izq .pack_propagate (False )
+
+
+frame_der =ctk .CTkFrame (ventana ,corner_radius =12 )
+frame_der .pack (side ="right",fill ="both",expand =True ,padx =14 ,pady =14 )
+
+
+
+
+titulo =ctk .CTkLabel (
+frame_izq ,
+text ="Analizador de Límites",
+font =ctk .CTkFont (size =18 ,weight ="bold"),
+justify ="center"
+)
+titulo .pack (pady =(12 ,2 ))
+
+subtitulo =ctk .CTkLabel (
+frame_izq ,
+text ="MATE1133 — UCTemuco",
+font =ctk .CTkFont (size =10 ),
+text_color ="gray"
+)
+subtitulo .pack (pady =(0 ,8 ))
+
+separador1 =ctk .CTkFrame (frame_izq ,height =2 ,fg_color ="#3a3a3a")
+separador1 .pack (fill ="x",padx =20 ,pady =4 )
+
+
+ctk .CTkLabel (
+frame_izq ,
+text ="Función  f(x):",
+font =ctk .CTkFont (size =13 ,weight ="bold"),
+anchor ="w"
+).pack (padx =20 ,pady =(8 ,2 ),anchor ="w")
+
+ctk .CTkLabel (
+frame_izq ,
+text ="Usa sintaxis Python: x**2, sin(x), log(x) ...",
+font =ctk .CTkFont (size =10 ),
+text_color ="gray",
+anchor ="w"
+).pack (padx =20 ,anchor ="w")
+
+entrada_funcion =ctk .CTkEntry (
+frame_izq ,
+width =330 ,
+height =34 ,
+placeholder_text ="Ej: (x**2 - 1)/(x - 1)",
+font =ctk .CTkFont (size =13 )
+)
+entrada_funcion .pack (padx =20 ,pady =(4 ,8 ))
+
+
+ctk .CTkLabel (
+frame_izq ,
+text ="Valor  h  (tendencia):",
+font =ctk .CTkFont (size =13 ,weight ="bold"),
+anchor ="w"
+).pack (padx =20 ,pady =(0 ,2 ),anchor ="w")
+
+ctk .CTkLabel (
+frame_izq ,
+text ='Escribe "oo" para infinito',
+font =ctk .CTkFont (size =10 ),
+text_color ="gray",
+anchor ="w"
+).pack (padx =20 ,anchor ="w")
+entrada_h =ctk .CTkEntry (
+frame_izq ,
+width =330 ,
+height =34 ,
+placeholder_text ="Ej: 1  ó  oo",
+font =ctk .CTkFont (size =13 )
+)
+entrada_h .pack (padx =20 ,pady =(4 ,10 ))
+ctk .CTkLabel (
+frame_izq ,
+text ="Dirección del límite:",
+font =ctk .CTkFont (size =13 ,weight ="bold"),
+anchor ="w"
+).pack (padx =20 ,anchor ="w")
+
+selector_direccion =ctk .CTkOptionMenu (
+frame_izq ,
+values =["Bilateral","Izquierda (−)","Derecha (+)"],
+width =330 ,
+font =ctk .CTkFont (size =13 )
+)
+selector_direccion .pack (padx =20 ,pady =(4 ,10 ))
+
+boton =ctk .CTkButton (
+frame_izq ,
+text ="▶  Calcular Límite",
+width =330 ,
+height =38 ,
+font =ctk .CTkFont (size =14 ,weight ="bold"),
+corner_radius =10 ,
+command =lambda :calcular ()
+)
+boton .pack (padx =20 ,pady =4 )
+
+separador2 =ctk .CTkFrame (frame_izq ,height =2 ,fg_color ="#3a3a3a")
+separador2 .pack (fill ="x",padx =20 ,pady =9 )
+
+
+ctk .CTkLabel (
+frame_izq ,
+text ="Resultado:",
+font =ctk .CTkFont (size =13 ,weight ="bold"),
+anchor ="w"
+).pack (padx =20 ,anchor ="w")
+
+label_resultado =ctk .CTkLabel (
+frame_izq ,
+text ="—",
+font =ctk .CTkFont (size =18 ,weight ="bold"),
+text_color ="#4fc3f7",
+wraplength =290 ,
+justify ="center"
+)
+label_resultado .pack (padx =20 ,pady =(2 ,6 ))
+
+
+ctk .CTkLabel (
+frame_izq ,
+text ="Explicación del procedimiento:",
+font =ctk .CTkFont (size =14 ,weight ="bold"),
+anchor ="w"
+).pack (padx =20 ,anchor ="w")
+
+caja_pasos =ctk .CTkTextbox (
+frame_izq ,
+width =345 ,
+height =285 ,
+font =ctk .CTkFont (size =14 ,family ="Arial"),
+wrap ="word",
+state ="disabled"
+)
+caja_pasos .pack (padx =20 ,pady =(4 ,10 ))
+
+
+
+
+figura =Figure (figsize =(6 ,5 ),facecolor ="#1e1e2e")
+ax =figura .add_subplot (111 )
+ax .set_facecolor ("#1e1e2e")
+ax .tick_params (colors ="white")
+ax .xaxis .label .set_color ("white")
+ax .yaxis .label .set_color ("white")
+ax .title .set_color ("white")
+for spine in ax .spines .values ():
+    spine .set_edgecolor ("#444")
+
+
+canvas =FigureCanvasTkAgg (figura ,master =frame_der )
+canvas .get_tk_widget ().pack (fill ="both",expand =True ,padx =10 ,pady =10 )
+
+
+
+
+
+
+def mostrar_explicacion (texto ):
+    """Reemplaza el contenido de la caja de explicacion."""
+    caja_pasos .configure (state ="normal")
+    caja_pasos .delete ("1.0","end")
+    caja_pasos .insert ("end",texto )
+    caja_pasos .configure (state ="disabled")
+
+
+def mostrar_error (titulo ,explicacion ):
+    """Muestra un error comprensible sin cerrar la aplicacion."""
+    label_resultado .configure (text =titulo ,text_color ="#ef9a9a")
+    mostrar_explicacion (explicacion )
+    limpiar_grafico (titulo )
+
+
+def limpiar_grafico (mensaje ):
+    """Limpia resultados anteriores cuando no se puede procesar una entrada."""
+    ax .clear ()
+    ax .set_facecolor ("#1e1e2e")
+    ax .tick_params (colors ="white")
+    for spine in ax .spines .values ():
+        spine .set_edgecolor ("#555")
+    ax .grid (True ,color ="#333",linestyle ="--",linewidth =0.5 )
+    ax .set_title (mensaje ,color ="#ef9a9a",fontsize =11 )
+    ax .set_xlabel ("x",color ="white")
+    ax .set_ylabel ("f(x)",color ="white")
+    canvas .draw ()
+
+
+def calcular ():
+    """Lee las entradas, ejecuta el algoritmo y actualiza la interfaz."""
+    funcion_str =entrada_funcion .get ().strip ()
+    h_str =entrada_h .get ().strip ()
+
+    if not funcion_str or not h_str :
+        mostrar_error (
+        "Completa ambos campos",
+        "Debes ingresar una función y el valor de tendencia h."
+        )
+        return 
+
+
+    try :
+        expresion =sympify (funcion_str )
+        if not expresion .free_symbols .issubset ({x }):
+            raise ValueError 
+    except Exception :
+        mostrar_error (
+        "No se pudo interpretar la función",
+        "Revisa la sintaxis ingresada.\n\n"
+        "Recuerda escribir las multiplicaciones usando *.\n"
+        "Ejemplo correcto: sin(5*x)/(x - sin(2*x))"
+        )
+        return 
+
+    try :
+        if h_str .lower ()in ["oo","inf","infinito"]:
+            h_val =oo 
+        elif h_str .lower ()in ["-oo","-inf"]:
+            h_val =-oo 
+        else :
+            h_val =sympify (h_str )
+            if (
+            h_val .free_symbols 
+            or h_val .is_number is not True 
+            or h_val .is_real is not True 
+            ):
+                raise ValueError 
+    except Exception :
+        mostrar_error (
+        "El valor de h no es válido",
+        'Ingresa un número o utiliza "oo" y "-oo" para infinito.\n\n'
+        "Ejemplos válidos: 0, 2, pi, oo, -oo"
+        )
+        return 
+
+    try :
+        direccion =selector_direccion .get ()
+        if direccion =="Izquierda (−)":
+            resultado =limite_lateral (expresion ,h_val ,"-")
+            pasos =[
+            "Límite lateral por la izquierda",
+            "",
+            f"Se estudian valores de x menores que {h_val },",
+            "cada vez más cercanos al punto.",
+            "",
+            f"El resultado obtenido es {resultado }."
+            ]
+        elif direccion =="Derecha (+)":
+            resultado =limite_lateral (expresion ,h_val ,"+")
+            pasos =[
+            "Límite lateral por la derecha",
+            "",
+            f"Se estudian valores de x mayores que {h_val },",
+            "cada vez más cercanos al punto.",
+            "",
+            f"El resultado obtenido es {resultado }."
+            ]
+        else :
+            resultado ,pasos =calcular_limite_propio (expresion ,h_val )
+
+        if resultado is not None :
+            label_resultado .configure (
+            text =f"lím f(x) = {resultado }",
+            text_color ="#4fc3f7"
+            )
+        else :
+            label_resultado .configure (
+            text ="El límite no existe",
+            text_color ="#ef9a9a"
+            )
+
+
+        try :
+            graficar (expresion ,h_val ,resultado )
+        except Exception :
+            pasos .append ("")
+            pasos .append ("No se pudo generar el gráfico,")
+            pasos .append ("pero el cálculo del límite fue completado.")
+
+        mostrar_explicacion ("\n".join (pasos ))
+
+    except Exception :
+        mostrar_error (
+        "No se pudo completar el cálculo",
+        "Ocurrió un error inesperado durante el procedimiento.\n\n"
+        "Revisa los datos ingresados e intenta nuevamente."
+        )
+
+
+def determinar_rango_grafico (h_val ):
+    """Retorna el centro y rango visible segun el valor de tendencia."""
+
+
+    if h_val ==oo :
+        return None ,1 ,100 
+
+    if h_val ==-oo :
+        return None ,-100 ,-1 
+
+    try :
+        centro =float (h_val )
+    except Exception :
+        centro =0 
+
+    rango =5 
+    return centro ,centro -rango ,centro +rango 
+
+
+def graficar (expresion ,h_val ,resultado ):
+    """Genera el grafico de la funcion con indicadores visuales."""
+
+    ax .clear ()
+    ax .set_facecolor ("#1e1e2e")
+    ax .tick_params (colors ="white")
+    for spine in ax .spines .values ():
+        spine .set_edgecolor ("#555")
+    ax .grid (True ,color ="#333",linestyle ="--",linewidth =0.5 )
+
+    centro ,inicio ,fin =determinar_rango_grafico (h_val )
+
+
+    lista_x =[]
+    lista_y =[]
+    f =lambdify (x ,expresion ,modules =["sympy"])
+
+    paso_iter =(fin -inicio )/400 
+    xi =inicio 
+    while xi <=fin :
+        lista_x .append (xi )
+        try :
+            yi =float (f (xi ))
+
+            if abs (yi )>1e6 :
+                lista_y .append (None )
+            else :
+                lista_y .append (yi )
+        except Exception :
+            lista_y .append (None )
+        xi +=paso_iter 
+
+
+    segmento_x ,segmento_y =[],[]
+    etiqueta_funcion_agregada =False 
+    for i in range (len (lista_x )):
+        if lista_y [i ]is None :
+            if segmento_x :
+                etiqueta ="f(x)"if not etiqueta_funcion_agregada else "_nolegend_"
+                ax .plot (
+                segmento_x ,segmento_y ,color ="#4fc3f7",
+                linewidth =2 ,label =etiqueta 
+                )
+                etiqueta_funcion_agregada =True 
+                segmento_x ,segmento_y =[],[]
+        else :
+
+
+            if segmento_y :
+                salto =abs (lista_y [i ]-segmento_y [-1 ])
+                escala =max (1 ,abs (lista_y [i ]),abs (segmento_y [-1 ]))
+                valores_moderados =abs (lista_y [i ])<10 and abs (segmento_y [-1 ])<10 
+                hay_discontinuidad =False 
+
+                if valores_moderados and salto >0.5 *escala :
+                    try :
+                        punto_medio =(lista_x [i ]+segmento_x [-1 ])/2 
+                        valor_medio =float (f (punto_medio ))
+                        promedio_extremos =(lista_y [i ]+segmento_y [-1 ])/2 
+                        hay_discontinuidad =(
+                        abs (valor_medio -promedio_extremos )>0.25 *escala 
+                        )
+                    except Exception :
+                        hay_discontinuidad =True 
+
+                if hay_discontinuidad :
+                    etiqueta ="f(x)"if not etiqueta_funcion_agregada else "_nolegend_"
+                    ax .plot (
+                    segmento_x ,segmento_y ,color ="#4fc3f7",
+                    linewidth =2 ,label =etiqueta 
+                    )
+                    etiqueta_funcion_agregada =True 
+                    segmento_x ,segmento_y =[],[]
+
+            segmento_x .append (lista_x [i ])
+            segmento_y .append (lista_y [i ])
+    if segmento_x :
+        etiqueta ="f(x)"if not etiqueta_funcion_agregada else "_nolegend_"
+        ax .plot (segmento_x ,segmento_y ,color ="#4fc3f7",linewidth =2 ,label =etiqueta )
+
+
+    if h_val not in [oo ,-oo ]:
+        ax .axvline (x =centro ,color ="#ff8a65",linestyle ="--",linewidth =1.4 ,label =f"x = h = {h_val }")
+
+
+    if resultado is not None and resultado not in [oo ,-oo ]and h_val not in [oo ,-oo ]:
+        try :
+            y_lim =float (resultado )
+            valor_en_h =expresion .subs (x ,h_val )
+            funcion_definida =valor_en_h .is_finite is True 
+            coincide_con_limite =funcion_definida and valor_en_h ==resultado 
+
+            if coincide_con_limite :
+                ax .plot (centro ,y_lim ,"o",color ="#a5d6a7",markersize =9 ,
+                zorder =5 ,label =f"Límite = {resultado }")
+            else :
+                ax .plot (
+                centro ,y_lim ,"o",markerfacecolor ="#1e1e2e",
+                markeredgecolor ="#a5d6a7",markeredgewidth =2 ,
+                markersize =9 ,zorder =5 ,label =f"Límite = {resultado }"
+                )
+
+
+                if funcion_definida :
+                    ax .plot (
+                    centro ,float (valor_en_h ),"o",color ="#ffca80",
+                    markersize =7 ,zorder =5 ,label =f"f({h_val }) = {valor_en_h }"
+                    )
+        except Exception :
+            pass 
+
+    if h_val ==oo :
+        titulo_grafico ="Comportamiento de f(x) cuando x tiende a +infinito"
+    elif h_val ==-oo :
+        titulo_grafico ="Comportamiento de f(x) cuando x tiende a -infinito"
+    else :
+        titulo_grafico =f"Gráfico de f(x) con tendencia h = {h_val }"
+
+    ax .set_title (titulo_grafico ,color ="white",fontsize =11 )
+    ax .set_xlabel ("x",color ="white")
+    ax .set_ylabel ("f(x)",color ="white")
+    elementos ,etiquetas =ax .get_legend_handles_labels ()
+    if elementos :
+        ax .legend (facecolor ="#2a2a3e",labelcolor ="white",fontsize =9 )
+
+    canvas .draw ()
+
+
+
+ventana .mainloop ()
